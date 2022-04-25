@@ -1,1 +1,11 @@
-Here's where we will put out read me
+Who is doing what:
+    Luke - Approximation Code
+    Dakota - Approximation Presentation
+    Deven - Exact Code Solution
+    TJ - Problem Presentation
+
+Problem Definition:
+    Given a complete weighted graph, what is the shortest cycle
+
+Input:
+    Weighted adjacency lists
