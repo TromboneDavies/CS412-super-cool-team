@@ -7,7 +7,7 @@
  - TJ - Problem Presentation (Make test cases with Dakota)
 
 ## Problem Definition:
-    Given a complete weighted graph, what is the shortest cycle
+Given a complete weighted graph, what is the shortest cycle
 
 ## Input:
-    Weighted adjacency lists
+Weighted adjacency lists
