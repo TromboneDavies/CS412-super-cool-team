@@ -10,6 +10,7 @@ Problem Definition:
 
 Input:
     Weighted adjacency lists in the following format:
+
     n (number of nodes)
     u v w (u: outgoing node, v: incoming node, w: weight)
     Examples:
