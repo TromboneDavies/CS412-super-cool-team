@@ -16,8 +16,8 @@ def main():
 
     # constants
     num_ants = 1000
-    pheromone_increase = 1
-    pheromone_dissapate = 2/10 # bigger is faster
+    pheromone_increase = 1.0
+    pheromone_dissapate = 3/10 # bigger is faster
 
     # get user input to build graph
     adj = {}
@@ -98,26 +98,34 @@ def main():
         for i in range(1, len(p)):
             if p[(i+f)%len(p)] != formatted[-1] and p[(i+f)%len(p)] != formatted[0]:
                 formatted += " -> " + p[(i+f)%len(p)]
-
         return formatted
-
-    stopwatch = time.time()
     
-    # until all paths traveled
-    while False in marked_all:
-        # let ants run
-        for ant in range(num_ants):
-            run_ant(ant)
+    def dissapate_pheromones():
         # dissapate pheromones
         for trail in pheromones:
             if pheromones[trail] > 1 + pheromone_dissapate:
                 pheromones[trail] -= pheromone_dissapate
     
+    # send out all ants at once
+    def theory1():
+        while False in marked_all:
+            for ant in range(num_ants):
+                run_ant(ant)
+            dissapate_pheromones()
+    
+    # let every ant run by itself
+    def theory2():
+        for ant in range(num_ants):
+            while not marked_all[ant]:
+                run_ant(ant)
+    
+    stopwatch = time.time()
+    theory2()
+    stopwatch = time.time() - stopwatch
+    
     # pick the shortest path that the ants found
     best_ant = min(cost, key=cost.get)
     shortest_path = path[best_ant]
-
-    stopwatch = time.time() - stopwatch
 
     print(f"Shortest path cost is: {cost[best_ant]}")
     print(f"Took {stopwatch:01f}s")
