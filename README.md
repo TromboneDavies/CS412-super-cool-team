@@ -7,8 +7,7 @@
  - TJ - Problem Presentation (Make test cases with Dakota)
 
 ## Problem Definition:
-Given a complete weighted graph, what is the shortest path which visits
-every node and ends where it starts
+Given a complete weighted graph and a starting node, what is the shortest tour
 
 ## Input:
 Weighted adjacency lists in the following format:
