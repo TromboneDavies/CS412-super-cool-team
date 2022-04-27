@@ -1,0 +1,16 @@
+15
+A B 1
+A C 100
+A D 1
+A E 100
+B C 1
+B D 100
+B E 100
+C D 100
+C E 1
+D E 100
+F A 1
+F B 100
+F C 100
+F D 1
+F E 1

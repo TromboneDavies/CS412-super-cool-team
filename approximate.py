@@ -12,70 +12,72 @@ def main():
     #        due to it traveling to a node during that time
     #   3. repeat until no more nodes are possible, and return home
     # place ants randomly and allow them to follow this structure. decrease pheromones slightly
-    # for each round.
+    # for each round.                                       
 
     # constants
-    num_ants = 500
+    num_ants = 1000
     pheromone_increase = 1
-    pheromone_dissapate = 0.1
+    pheromone_dissapate = 2/10 # bigger is faster
 
-    # these will require input
-    num_nodes = 5 # however many nodes there are
-    G = set() # (x1, y1), (x2, y2), ...
-    for x in range(num_nodes): # TODO make this better with itertools
-        for y in range(num_nodes):
-            G.add((x, y))
+    # get user input to build graph
+    adj = {}
+    nodes = set()
+    max_weight = 0
+    for _ in range(int(input())):
+        u, v, w = input().split()
+        w = int(w)
+        adj[(u,v)] = w
+        adj[(v,u)] = w
+        if u not in nodes: nodes.add(u)
+        if v not in nodes: nodes.add(v)
+        if w > max_weight: max_weight = w
 
     # just ant things #antlife
-    marked = {n: set() for n in range(num_ants)} # marked list for each ant (avoiding classes lol)
+    position = {n: random.choice(list(nodes)) for n in range(num_ants)}
+    marked = {n: set(position[n]) for n in range(num_ants)} # marked list for each ant (avoiding classes lol)
     marked_all = [False] * num_ants # each ant can set its marked_all to true for easy checking
-    position = {n: (random.randint(0, num_nodes-1), random.randint(0, num_nodes-1)) for n in range(num_ants)}
     travel = {n: 0 for n in range(num_ants)}
-    pheromones = {} # every ant has same access; ((x1, y1), (x2, y2)): strength, ...
-    for es in itertools.product(list(G), repeat=2):
+    pheromones = {} # every ant has same access; (A, B): strength, ...
+    for es in itertools.product(list(nodes), repeat=2):
         e1, e2 = es
         if e1 != e2:
             pheromones[es] = 1.0
     
     # results
-    path = {n: [] for n in range(num_ants)} # path for each 
+    path = {n: [position[n]] for n in range(num_ants)} # path for each 
     cost = {n: 0 for n in range(num_ants)} # cost of each path
-
-    # calculates distance between two points
-    def distance(a, b):
-        x1, y1 = a
-        x2, y2 = b
-        return sqrt((x2-x1)**2 + (y2-y1)**2)
     
     # chooses a node to visit
     # based on distance and pheromones
     def choose_node(ant_id):
         
-        # scores a node based on it's distance and pheromones
+        # scores a node based on pheromones
         def score(node):
-            pos = position[ant_id]
-            max_dist = distance((0,0), (num_nodes, num_nodes))
-            ant_dist = distance(pos, node)
-            return  int((max_dist - ant_dist) * pheromones[pos, node])
+            return int(pheromones[position[ant_id], node])
         
         def valid(node):
             return node not in marked[ant_id] and node != position[ant_id]
         
-        # build weighted graph
-        g = {t: int(score(t)) for t in G if valid(t)}
-        # this is stupid
+        # new graph, removing invalid nodes
+        g = {t: int(score(t)) for t in nodes if valid(t)}
         bag = []
         for t in g:
             for _ in range(g[t]):
                 bag.append(t)
+        
+        # choose randomly from probabilistically generated bag
         return random.choice(bag)
 
     def run_ant(ant_id):
         # ensure we have nodes to visit
-        if len(G) == len(marked[ant_id]):
+        if len(nodes) == len(marked[ant_id]):
+            # return home if not there
+            if path[ant_id][0] != path[ant_id][-1]:
+                path[ant_id].append(path[ant_id][0])
+                cost[ant_id] += adj[position[ant_id], path[ant_id][0]]
             marked_all[ant_id] = True
             return
-        # if ant is traveling, only update it's 
+        # if ant is traveling, only update its travel counter
         if travel[ant_id] > 0:
             travel[ant_id] -= 1
             return
@@ -83,12 +85,21 @@ def main():
         to_visit = choose_node(ant_id)
         # visit the node
         marked[ant_id].add(to_visit)
-        travel[ant_id] = int(distance(position[ant_id], to_visit))
+        travel[ant_id] = int(adj[position[ant_id], to_visit])
         pheromones[position[ant_id], to_visit] += pheromone_increase
         # move
         path[ant_id].append(to_visit)
-        cost[ant_id] += distance(position[ant_id], to_visit)
+        cost[ant_id] += adj[position[ant_id], to_visit]
         position[ant_id] = to_visit
+
+    def formatted_path(p, first):
+        f = p.index(first)
+        formatted = p[f]
+        for i in range(1, len(p)):
+            if p[(i+f)%len(p)] != formatted[-1] and p[(i+f)%len(p)] != formatted[0]:
+                formatted += " -> " + p[(i+f)%len(p)]
+
+        return formatted
 
     stopwatch = time.time()
     
@@ -103,19 +114,15 @@ def main():
                 pheromones[trail] -= pheromone_dissapate
     
     # pick the shortest path that the ants found
-    least_cost = min(cost.values())
-    best_ant = [k for k in cost if cost[k] == least_cost][0]
+    best_ant = min(cost, key=cost.get)
     shortest_path = path[best_ant]
 
     stopwatch = time.time() - stopwatch
 
-    print(f"Shortest path cost is: {least_cost}")
+    print(f"Shortest path cost is: {cost[best_ant]}")
     print(f"Took {stopwatch:01f}s")
-    # print(f"Shortest path:")
-    # print(shortest_path[0], end="")
-    # for n in range(1, len(shortest_path)):
-    #     print(f" -> {shortest_path[n]}", end="")
-    # print()
+    print(f"Shortest path:")
+    print(formatted_path(shortest_path, "A"))
 
 if __name__ == "__main__":
     main()
