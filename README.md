@@ -7,7 +7,15 @@
  - TJ - Problem Presentation (Make test cases with Dakota)
 
 ## Problem Definition:
-Given a complete weighted graph, what is the shortest cycle
+Given a complete weighted graph and a starting node, what is the shortest tour
 
 ## Input:
-Weighted adjacency lists
+Weighted adjacency lists in the following format:
+n (number of nodes)
+u v w (u: outgoing node, v: incoming node, w: weight)
+Examples:
+    3
+    A B 3
+    B C 2
+    C A 1
+
