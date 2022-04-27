@@ -12,7 +12,7 @@ def main():
     #        due to it traveling to a node during that time
     #   3. repeat until no more nodes are possible, and return home
     # place ants randomly and allow them to follow this structure. decrease pheromones slightly
-    # for each round.                                       
+    # for each round.
 
     # constants
     num_ants = 1000
@@ -23,7 +23,9 @@ def main():
     adj = {}
     nodes = set()
     max_weight = 0
-    for _ in range(int(input())):
+    num_nodes = int(input())
+    num_edges = int((num_nodes*(num_nodes-1))/2)
+    for _ in range(num_edges):
         u, v, w = input().split()
         w = int(w)
         adj[(u,v)] = w
@@ -50,7 +52,6 @@ def main():
     # chooses a node to visit
     # based on distance and pheromones
     def choose_node(ant_id):
-        
         # scores a node based on pheromones
         def score(node):
             return int(pheromones[position[ant_id], node])
@@ -106,21 +107,15 @@ def main():
             if pheromones[trail] > 1 + pheromone_dissapate:
                 pheromones[trail] -= pheromone_dissapate
     
-    # send out all ants at once
+    # let all ants loose at the same time
     def theory1():
         while False in marked_all:
             for ant in range(num_ants):
                 run_ant(ant)
             dissapate_pheromones()
-    
-    # let every ant run by itself
-    def theory2():
-        for ant in range(num_ants):
-            while not marked_all[ant]:
-                run_ant(ant)
-    
+
     stopwatch = time.time()
-    theory2()
+    theory1()
     stopwatch = time.time() - stopwatch
     
     # pick the shortest path that the ants found
