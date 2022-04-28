@@ -4,16 +4,6 @@ from math import sqrt
 import time
 
 def main():
-    # concept: ant colony optimization (ACO)
-    #  FOR EACH ANT:
-    #   1. probabilistically select an edge based on the weight and pheromones levels
-    #   2. travel to that path, adding pheromones to the edge
-    #      - traveling down a path takes time, so an ant might be skipped in a round
-    #        due to it traveling to a node during that time
-    #   3. repeat until no more nodes are possible, and return home
-    # place ants randomly and allow them to follow this structure. decrease pheromones slightly
-    # for each round.
-
     # constants
     num_ants = 1000
     pheromone_increase = 1.0
@@ -33,9 +23,10 @@ def main():
         if u not in nodes: nodes.add(u)
         if v not in nodes: nodes.add(v)
         if w > max_weight: max_weight = w
+    expected_solution = int(input())
 
     # just ant things #antlife
-    position = {n: random.choice(list(nodes)) for n in range(num_ants)}
+    position = {n: 'A' for n in range(num_ants)}
     marked = {n: set(position[n]) for n in range(num_ants)} # marked list for each ant (avoiding classes lol)
     marked_all = [False] * num_ants # each ant can set its marked_all to true for easy checking
     travel = {n: 0 for n in range(num_ants)}
@@ -44,11 +35,11 @@ def main():
         e1, e2 = es
         if e1 != e2:
             pheromones[es] = 1.0
-    
+
     # results
     path = {n: [position[n]] for n in range(num_ants)} # path for each 
     cost = {n: 0 for n in range(num_ants)} # cost of each path
-    
+
     # chooses a node to visit
     # based on distance and pheromones
     def choose_node(ant_id):
@@ -99,7 +90,7 @@ def main():
         for i in range(1, len(p)):
             if p[(i+f)%len(p)] != formatted[-1] and p[(i+f)%len(p)] != formatted[0]:
                 formatted += " -> " + p[(i+f)%len(p)]
-        return formatted
+        return formatted + f" -> {first}"
     
     def dissapate_pheromones():
         # dissapate pheromones
@@ -123,9 +114,10 @@ def main():
     shortest_path = path[best_ant]
 
     print(f"Shortest path cost is: {cost[best_ant]}")
-    print(f"Took {stopwatch:01f}s")
+    print(f"Expected path cost is: {expected_solution}")
     print(f"Shortest path:")
     print(formatted_path(shortest_path, "A"))
+    print(f"Solution took {stopwatch:.3f}s")
 
 if __name__ == "__main__":
     main()
