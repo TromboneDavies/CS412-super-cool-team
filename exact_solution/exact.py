@@ -4,6 +4,11 @@ import time
 
 """
     Name: Deven Sarma
+
+    Sources:
+    https://www.geeksforgeeks.org/travelling-salesman-problem-set-1/
+    https://stackoverflow.com/questions/104420/how-to-generate-all-permutations-of-a-list
+    
 """
 
 
