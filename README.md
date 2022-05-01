@@ -16,9 +16,11 @@ S (start node)
 u v w (u: outgoing node, v: incoming node, w: weight)
 
 Example:
-    3
-    A
-    A B 3
-    B C 2
-    C A 1
-    6
+```
+3
+A
+A B 3
+B C 2
+C A 1
+6
+```
