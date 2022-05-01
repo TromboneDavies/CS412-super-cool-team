@@ -36,6 +36,9 @@ def ACO():
         if v not in nodes: nodes.add(v)
         if w > max_weight: max_weight = w
     expected_solution = int(input())
+
+    # best values thus far. these get updated as the ants use
+    # their pheromones to probablistically construct better paths
     best_path = []
     best_cost = sys.maxsize
 
