@@ -3,121 +3,142 @@ import itertools
 from math import sqrt
 import time
 
-def main():
+# Ant Colony Optimization
+def ACO():
     # constants
-    num_ants = 1000
-    pheromone_increase = 1.0
-    pheromone_dissapate = 3/10 # bigger is faster
+    num_ants = 500
+    pheromone_initial = 1.0
+    pheromone_increase = 8.0
+    pheromone_decrease = 0.4
+    pheromone_power = 1
+    distance_power = 1
 
-    # get user input to build graph
-    adj = {}
-    nodes = set()
+    # get input and create graph
+    weight = {}
     max_weight = 0
+    nodes = set()
     num_nodes = int(input())
+    start = input()
     num_edges = int((num_nodes*(num_nodes-1))/2)
     for _ in range(num_edges):
         u, v, w = input().split()
         w = int(w)
-        adj[(u,v)] = w
-        adj[(v,u)] = w
+        weight[(u, v)] = w
+        weight[(v, u)] = w
         if u not in nodes: nodes.add(u)
         if v not in nodes: nodes.add(v)
         if w > max_weight: max_weight = w
     expected_solution = int(input())
 
-    # just ant things #antlife
-    position = {n: 'A' for n in range(num_ants)}
-    marked = {n: set(position[n]) for n in range(num_ants)} # marked list for each ant (avoiding classes lol)
-    marked_all = [False] * num_ants # each ant can set its marked_all to true for easy checking
-    travel = {n: 0 for n in range(num_ants)}
-    pheromones = {} # every ant has same access; (A, B): strength, ...
-    for es in itertools.product(list(nodes), repeat=2):
-        e1, e2 = es
-        if e1 != e2:
-            pheromones[es] = 1.0
-
-    # results
-    path = {n: [position[n]] for n in range(num_ants)} # path for each 
-    cost = {n: 0 for n in range(num_ants)} # cost of each path
-
-    # chooses a node to visit
-    # based on distance and pheromones
+    # variables for ants
+    position = {n: start for n in range(num_ants)}
+    marked = {n: set(start) for n in range(num_ants)}
+    visited_all = [False] * num_ants
+    
+    # global pheromone counters for each edge
+    pheromones = {}
+    for edge in itertools.product(list(nodes), repeat=2):
+        n1, n2 = edge
+        if n1 != n2:
+            pheromones[edge] = pheromone_initial
+    
+    # simulates an ant looking at its options and choosing a path
+    # randomly, but with some bias towards pheromone-heavy paths
     def choose_node(ant_id):
-        # scores a node based on pheromones
+        # scores a node based on its pheromone level
         def score(node):
-            return int(pheromones[position[ant_id], node])
-        
+            score = (max_weight - weight[position[ant_id], node]) * distance_power
+            score += pheromone_increase * pheromone_power
+            return int(score) if score > 1 else 1
+        # return True if a node hasn't been visited by this ant
         def valid(node):
             return node not in marked[ant_id] and node != position[ant_id]
         
-        # new graph, removing invalid nodes
-        g = {t: int(score(t)) for t in nodes if valid(t)}
+        # create a temp graph with no invalid nodes, where the value
+        # is the "score" of the pheromone level for that node
+        g = {n: score(n) for n in nodes if valid(n)}
+        # create a bag, stronger pheromone paths are in the bag more
         bag = []
-        for t in g:
-            for _ in range(g[t]):
-                bag.append(t)
-        
-        # choose randomly from probabilistically generated bag
-        return random.choice(bag)
+        for node in g:
+            for _ in range(g[node]):
+                bag.append(node)
 
+        return random.choice(bag)
+    
+    # increases pheromones between two given nodes of `trail`
+    def increase_pheromones(trail):
+        n1, n2 = trail
+        pheromones[n1, n2] += pheromone_increase
+    
+    # simulates time by dissapating the pheromone level of an edge
+    # without having to use a for loop to wait
+    def dissapate_pheromones(trail):
+        # dissapate the pheromones
+        pheromones[trail] += (pheromone_increase - (pheromone_decrease * weight[trail]))
+        # ensure that the minimum is there
+        if pheromones[trail] < pheromone_initial: pheromones[trail] = pheromone_initial
+    
+    # takes care of pheromone things as an ant travels on a given
+    # trail (aka path or edge)
+    def travel(trail):
+        increase_pheromones(trail)
+        dissapate_pheromones(trail)
+    
+    # run an ant. it will choose it's next node and go there, dropping
+    # pheromones as it goes and they will dissapate as he travels
     def run_ant(ant_id):
         # ensure we have nodes to visit
         if len(nodes) == len(marked[ant_id]):
-            # return home if not there
-            if path[ant_id][0] != path[ant_id][-1]:
-                path[ant_id].append(path[ant_id][0])
-                cost[ant_id] += adj[position[ant_id], path[ant_id][0]]
-            marked_all[ant_id] = True
+            # go home if not there already
+            if position[ant_id] != start:
+                increase_pheromones((position[ant_id], start))
+                position[ant_id] = start
+            visited_all[ant_id] = True
             return
-        # if ant is traveling, only update its travel counter
-        if travel[ant_id] > 0:
-            travel[ant_id] -= 1
-            return
-        # choose a node to visit
+        # choose and visit next node
         to_visit = choose_node(ant_id)
-        # visit the node
         marked[ant_id].add(to_visit)
-        travel[ant_id] = int(adj[position[ant_id], to_visit])
-        pheromones[position[ant_id], to_visit] += pheromone_increase
-        # move
-        path[ant_id].append(to_visit)
-        cost[ant_id] += adj[position[ant_id], to_visit]
+        travel((position[ant_id], to_visit))
         position[ant_id] = to_visit
-
-    def formatted_path(p, first):
-        f = p.index(first)
-        formatted = p[f]
-        for i in range(1, len(p)):
-            if p[(i+f)%len(p)] != formatted[-1] and p[(i+f)%len(p)] != formatted[0]:
-                formatted += " -> " + p[(i+f)%len(p)]
-        return formatted + f" -> {first}"
     
-    def dissapate_pheromones():
-        # dissapate pheromones
-        for trail in pheromones:
-            if pheromones[trail] > 1 + pheromone_dissapate:
-                pheromones[trail] -= pheromone_dissapate
+    # greedily chooses a path based on pheromone levels, NOT edge
+    # weights. essentially chooses most traveled tour. returns a
+    # tuple of the path and the cost, respectively
+    def greedy_path():
+        path = [start]
+        cost = 0
+        while len(nodes) > len(path):
+            # choose the next node
+            strongest_ph = 0
+            best_node = None
+            for node in nodes:
+                # if node if valid
+                if node != path[-1] and node not in path:
+                    # if node is better
+                    if pheromones[path[-1], node] > strongest_ph:
+                        strongest_ph = pheromones[path[-1], node]
+                        best_node = node
+            # add pheromoniest node
+            cost += weight[path[-1], best_node]
+            path.append(best_node)
+        cost += weight[path[-1], start]
+        path.append(start)
+        return path, cost
     
-    # let all ants loose at the same time
-    def theory1():
-        while False in marked_all:
-            for ant in range(num_ants):
-                run_ant(ant)
-            dissapate_pheromones()
-
+    # run ants through the graph, timing their efforts
     stopwatch = time.time()
-    theory1()
+    while False in visited_all:
+        for ant in range(num_ants):
+            run_ant(ant)
     stopwatch = time.time() - stopwatch
-    
-    # pick the shortest path that the ants found
-    best_ant = min(cost, key=cost.get)
-    shortest_path = path[best_ant]
 
-    print(f"Shortest path cost is: {cost[best_ant]}")
-    print(f"Expected path cost is: {expected_solution}")
-    print(f"Shortest path:")
-    print(formatted_path(shortest_path, "A"))
-    print(f"Solution took {stopwatch:.3f}s")
+    # follow the pheromones to get ants' path
+    best_path, best_cost = greedy_path()
+
+    print(f"Given best path cost: {expected_solution}")
+    print(f"Ants found path cost: {best_cost}")
+    print(f"Ants' path: {' -> '.join(best_path)}")
+    print(f"Ants took {stopwatch:.3f} seconds")
 
 if __name__ == "__main__":
-    main()
+    ACO()
