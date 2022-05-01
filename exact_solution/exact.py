@@ -37,9 +37,11 @@ def main():
     all_permutations = permute(permutation_list, start_node)
     cost, path = shortest_path(adj_list, all_permutations)
     end_time = time.time()
-    print("Shortest path: ", cost)
-    print("Path:", path)
-    print("Execution Time excluding input: ", end_time-start_time)
+    print("Number of nodes: ", nodes)
+    print("Shortest path:   ",cost)
+    print("Path: ",path)
+    print("Execution time excluding input: ",end_time-start_time)
+    print()
 
 
 def permute(permutation_list, start_node):
