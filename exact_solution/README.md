@@ -12,7 +12,7 @@ start node\
 number of edges in u v w format.\
     denoting an edge from vertex u to vertex v with weight w.\
     (all weights should be positive integers)\
-    (number of edges should be num_nodes * (num_nodes - 1)) / 2)\
+    (number of edges should be num_nodes * (num_nodes - 1)) / 2)
 
 Example: \
 4\
