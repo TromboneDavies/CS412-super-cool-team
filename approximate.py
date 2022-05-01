@@ -2,20 +2,23 @@ import random
 import itertools
 from math import sqrt
 import time
+import sys
 
 '''
 TODO: are these right?
 Ant Colony Optimization
 Program type: Probabilistic
-Time complex: O(A*log(E))?
+Time complex: O(A*Elog(E))?
 '''
 
 def ACO():
     # constants
-    num_ants = 500
+    num_ants = 200
     pheromone_initial = 1.0
-    pheromone_increase = 8.0
-    pheromone_decrease = 0.4
+    pheromone_increase = 10.0
+    pheromone_decrease = 0.3
+    pheromone_power = 1
+    weight_power = 4
 
     # get input and create graph
     weight = {}
@@ -33,6 +36,11 @@ def ACO():
         if v not in nodes: nodes.add(v)
         if w > max_weight: max_weight = w
     expected_solution = int(input())
+
+    # best values thus far. these get updated as the ants use
+    # their pheromones to probablistically construct better paths
+    best_path = []
+    best_cost = sys.maxsize
 
     # variables for ants
     position = {n: start for n in range(num_ants)}
@@ -94,8 +102,10 @@ def ACO():
     def choose_node(ant_id):
         # scores a node based on its pheromone level
         def score(node):
-            score = (max_weight - weight[position[ant_id], node])
-            score += pheromones[position[ant_id], node]
+            # score = (max_weight - weight[position[ant_id], node])
+            # score += pheromones[position[ant_id], node]
+            score = (1/weight[position[ant_id], node])**weight_power
+            score *= pheromones[position[ant_id], node]**pheromone_power
             return int(score) if score > 1 else 1
         # return True if a node hasn't been visited by this ant
         def valid(node):
@@ -115,22 +125,30 @@ def ACO():
                 increase_pheromones((position[ant_id], start))
                 position[ant_id] = start
             marked_all[ant_id] = True
-            return
+            return start
         # choose and visit next node
-        to_visit = choose_node(ant_id)
-        marked[ant_id].add(to_visit)
-        travel((position[ant_id], to_visit))
-        position[ant_id] = to_visit
+        next_node = choose_node(ant_id)
+        marked[ant_id].add(next_node)
+        travel((position[ant_id], next_node))
+        position[ant_id] = next_node
+        return next_node
     
-    # run ants through the graph, timing their efforts
+    # run ants through the graph, timing their efforts. keeps
+    # track of the best path so far, and ants will hone down
+    # the paths they prefer based on pheromones and randomness
     stopwatch = time.time()
-    while False in marked_all:
-        for ant in range(num_ants):
-            run_ant(ant)
+    for ant in range(num_ants):
+        path, cost = [start], 0
+        while not marked_all[ant]:
+            path.append(run_ant(ant))
+            cost += weight[path[-2], path[-1]]
+        if cost < best_cost:
+            best_path = path
+            best_cost = cost
     stopwatch = time.time() - stopwatch
 
     # follow the pheromones to get ants' path
-    best_path, best_cost = greedy_path()
+    # best_path, best_cost = greedy_path()
 
     # output solutions
     print(f"Given best path cost: {expected_solution}")

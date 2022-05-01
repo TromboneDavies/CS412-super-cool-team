@@ -34,8 +34,8 @@ def main():
             permutation_list.add(v)
     
     start_time = time.time()
-    all_permutations = permute(permutation_list, start_node)
-    cost, path = shortest_path(adj_list, all_permutations)
+    cost, path = permute(adj_list, permutation_list, start_node)
+    #cost, path = shortest_path(adj_list, all_permutations)
     end_time = time.time()
     print("Number of nodes: ", nodes)
     print("Shortest path:   ",cost)
@@ -44,34 +44,32 @@ def main():
     print()
 
 
-def permute(permutation_list, start_node):
-    permutations = list(itertools.permutations(permutation_list))
-    all_permutations = []   # list to hold all permutations
-    for permutation in permutations:
-        this_permutation = list(permutation)
-        this_permutation.insert(0, start_node)  # add the start node to the front and end of list
-        this_permutation.append(start_node)
-        all_permutations.append(this_permutation)   # add this_permutation to all_permutations
-
-    return all_permutations
-
-def shortest_path(adjacency_list, all_permutations):
+def permute(adjacency_list, permutation_list, start_node):
+    permutations = itertools.permutations(permutation_list)
     best_cost = sys.maxsize
     best_path = None
-    for permutation in all_permutations:
-        this_cost = 0
-        start_node = permutation[0]
-        for node in permutation[1:]:
-            # look up cost from start_node to node
-            tup = [item for item in adjacency_list[start_node] if node in item]
-            this_cost += tup[0][1]
-            start_node = node
+
+    for permutation in permutations:
+        this_permutation = list(permutation)
+        this_permutation.insert(0, start_node)  # add start_node to front of list
+        this_permutation.append(start_node)     # add start_node to end of list
+        this_cost = shortest_path(adjacency_list, this_permutation) # calculate cost of this_permutation
         if this_cost < best_cost:
-            best_path = permutation
+            best_path = this_permutation
         best_cost = min(best_cost, this_cost)
 
     return best_cost, best_path
 
+def shortest_path(adjacency_list, permutation):
+    this_cost = 0
+    start_node = permutation[0]
+    for node in permutation[1:]:
+        # look up cost from start_node to node
+        tup = [item for item in adjacency_list[start_node] if node in item]
+        this_cost += tup[0][1]
+        start_node = node
+
+    return this_cost
 
 if __name__ == "__main__":
     main()
