@@ -14,10 +14,13 @@ Weighted adjacency lists in the following format:
 n (number of nodes)
 S (start node)
 u v w (u: outgoing node, v: incoming node, w: weight)
-Examples:
-    3
-    A
-    A B 3
-    B C 2
-    C A 1
 
+Example:
+```
+3
+A
+A B 3
+B C 2
+C A 1
+6
+```

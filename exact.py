@@ -1,5 +1,6 @@
 import itertools
 import sys
+import time
 
 """
     Name: Deven Sarma
@@ -31,11 +32,14 @@ def main():
             permutation_list.add(u)
         if v != start_node:
             permutation_list.add(v)
-
+    
+    start_time = time.time()
     all_permutations = permute(permutation_list, start_node)
     cost, path = shortest_path(adj_list, all_permutations)
-    print(cost)
-    print(path)
+    end_time = time.time()
+    print("Shortest path: ", cost)
+    print("Path:", path)
+    print("Execution Time excluding input: ", end_time-start_time)
 
 
 def permute(permutation_list, start_node):
