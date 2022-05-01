@@ -14,7 +14,7 @@ def main():
         c = tests[test]
         final += f"{a} {b} {c}\n"
     
-    with open("test.txt", "w+") as f:
+    with open("tests/tests.txt", "w+") as f:
         f.write(final)
 
 if __name__ == "__main__":
