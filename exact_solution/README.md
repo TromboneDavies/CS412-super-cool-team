@@ -14,6 +14,16 @@ number of edges in u v w format.\
     (all weights should be positive integers)\
     (number of edges should be num_nodes * (num_nodes - 1)) / 2)\
 
+Example: \
+4\
+A\
+A B 10\
+A C 10\
+A D 10\
+B C 10\
+B D 10\
+C D 10
+
 # Running multiple tests:
 Run ./run_test_cases_short.sh to run all tests which take 1 minute or less
 
