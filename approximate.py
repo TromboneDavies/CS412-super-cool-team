@@ -16,8 +16,6 @@ def ACO():
     pheromone_initial = 1.0
     pheromone_increase = 8.0
     pheromone_decrease = 0.4
-    pheromone_power = 1
-    distance_power = 1
 
     # get input and create graph
     weight = {}
@@ -38,7 +36,7 @@ def ACO():
 
     # variables for ants
     position = {n: start for n in range(num_ants)}
-    marked = {n: set(start) for n in range(num_ants)}
+    marked = {n: set([start]) for n in range(num_ants)}
     marked_all = [False] * num_ants
     
     # global pheromone counters for each edge
@@ -53,23 +51,16 @@ def ACO():
     def choose_node(ant_id):
         # scores a node based on its pheromone level
         def score(node):
-            score = (max_weight - weight[position[ant_id], node]) * distance_power
-            score += pheromone_increase * pheromone_power
+            score = (max_weight - weight[position[ant_id], node])
+            score += pheromones[position[ant_id], node]
             return int(score) if score > 1 else 1
         # return True if a node hasn't been visited by this ant
         def valid(node):
             return node not in marked[ant_id] and node != position[ant_id]
         
-        # create a temp graph with no invalid nodes, where the value
-        # is the "score" of the pheromone level for that node
-        g = {n: score(n) for n in nodes if valid(n)}
-        # create a bag, stronger pheromone paths are in the bag more
-        bag = []
-        for node in g:
-            for _ in range(g[node]):
-                bag.append(node)
-
-        return random.choice(bag)
+        bag = [n for n in nodes if valid(n)]
+        bag_weight = [score(n) for n in bag]
+        return random.choices(bag, bag_weight)[0]
     
     # increases pheromones between two given nodes of `trail`
     def increase_pheromones(trail):
