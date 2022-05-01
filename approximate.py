@@ -3,7 +3,13 @@ import itertools
 from math import sqrt
 import time
 
-# Ant Colony Optimization
+'''
+TODO: are these right?
+Ant Colony Optimization
+Program type: Probabilistic
+Time complex: O(A*log(E))?
+'''
+
 def ACO():
     # constants
     num_ants = 500
@@ -33,7 +39,7 @@ def ACO():
     # variables for ants
     position = {n: start for n in range(num_ants)}
     marked = {n: set(start) for n in range(num_ants)}
-    visited_all = [False] * num_ants
+    marked_all = [False] * num_ants
     
     # global pheromone counters for each edge
     pheromones = {}
@@ -93,7 +99,7 @@ def ACO():
             if position[ant_id] != start:
                 increase_pheromones((position[ant_id], start))
                 position[ant_id] = start
-            visited_all[ant_id] = True
+            marked_all[ant_id] = True
             return
         # choose and visit next node
         to_visit = choose_node(ant_id)
@@ -127,7 +133,7 @@ def ACO():
     
     # run ants through the graph, timing their efforts
     stopwatch = time.time()
-    while False in visited_all:
+    while False in marked_all:
         for ant in range(num_ants):
             run_ant(ant)
     stopwatch = time.time() - stopwatch
@@ -135,6 +141,7 @@ def ACO():
     # follow the pheromones to get ants' path
     best_path, best_cost = greedy_path()
 
+    # output solutions
     print(f"Given best path cost: {expected_solution}")
     print(f"Ants found path cost: {best_cost}")
     print(f"Ants' path: {' -> '.join(best_path)}")
