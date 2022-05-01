@@ -8,7 +8,7 @@ import sys
 TODO: are these right?
 Ant Colony Optimization
 Program type: Probabilistic
-Time complex: O(A*Elog(E))?
+Time complex: O(AN)
 '''
 
 def ACO():
@@ -54,30 +54,6 @@ def ACO():
         if n1 != n2:
             pheromones[edge] = pheromone_initial
     
-    # greedily chooses a path based on pheromone levels, NOT edge
-    # weights. essentially chooses most traveled tour. returns a
-    # tuple of the path and the cost, respectively
-    def greedy_path():
-        path = [start]
-        cost = 0
-        while len(nodes) > len(path):
-            # choose the next node
-            strongest_ph = 0
-            best_node = None
-            for node in nodes:
-                # if node if valid
-                if node != path[-1] and node not in path:
-                    # if node is better
-                    if pheromones[path[-1], node] > strongest_ph:
-                        strongest_ph = pheromones[path[-1], node]
-                        best_node = node
-            # add pheromoniest node
-            cost += weight[path[-1], best_node]
-            path.append(best_node)
-        cost += weight[path[-1], start]
-        path.append(start)
-        return path, cost
-    
     # increases pheromones between two given nodes of `trail`
     def increase_pheromones(trail):
         n1, n2 = trail
@@ -102,8 +78,6 @@ def ACO():
     def choose_node(ant_id):
         # scores a node based on its pheromone level
         def score(node):
-            # score = (max_weight - weight[position[ant_id], node])
-            # score += pheromones[position[ant_id], node]
             score = (1/weight[position[ant_id], node])**weight_power
             score *= pheromones[position[ant_id], node]**pheromone_power
             return int(score) if score > 1 else 1
@@ -146,9 +120,6 @@ def ACO():
             best_path = path
             best_cost = cost
     stopwatch = time.time() - stopwatch
-
-    # follow the pheromones to get ants' path
-    # best_path, best_cost = greedy_path()
 
     # output solutions
     print(f"Given best path cost: {expected_solution}")
