@@ -5,7 +5,6 @@ import time
 import sys
 
 '''
-TODO: are these right?
 Ant Colony Optimization
   Program type: Probabilistic
   Time complex: O(AN), where A is the # of ants and N is # of nodes
@@ -35,7 +34,6 @@ def ACO():
         if u not in nodes: nodes.add(u)
         if v not in nodes: nodes.add(v)
         if w > max_weight: max_weight = w
-    # expected_solution = int(input())
 
     # best values thus far. these get updated as the ants use
     # their pheromones to probablistically construct better paths
@@ -76,7 +74,7 @@ def ACO():
     # simulates an ant looking at its options and choosing a path
     # randomly, but with some bias towards pheromone-heavy paths
     def choose_node(ant_id):
-        # scores a node based on its pheromone level
+        # scores a node based on its weight (inversely) and pheromone level
         def score(node):
             score = (1/weight[position[ant_id], node])**weight_power
             score *= pheromones[position[ant_id], node]**pheromone_power
@@ -85,6 +83,7 @@ def ACO():
         def valid(node):
             return node not in marked[ant_id] and node != position[ant_id]
         
+        # make weighted bag and choose from it
         bag = [n for n in nodes if valid(n)]
         bag_weight = [score(n) for n in bag]
         return random.choices(bag, bag_weight)[0]
@@ -122,7 +121,6 @@ def ACO():
     stopwatch = time.time() - stopwatch
 
     # output solutions
-    # print(f"Given best path cost: {expected_solution}")
     print(f"Ants found path cost: {best_cost}")
     print(f"Ants' path: {' -> '.join(best_path)}")
     print(f"Ants took {stopwatch:.3f} seconds")
